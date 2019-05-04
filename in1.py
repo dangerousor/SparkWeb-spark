@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from .error import err_wrap
-from .const import HDFS_PATH
+from error import err_wrap
+from const import HDFS_PATH
 from pyspark.mllib.clustering import KMeans
 from pyspark.mllib.fpm import FPGrowth
 from pyspark.mllib.classification import LogisticRegressionWithLBFGS

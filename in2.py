@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from .error import err_wrap
+from error import err_wrap
 import pyspark
 
 
