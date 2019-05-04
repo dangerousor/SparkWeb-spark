@@ -26,15 +26,16 @@ def do_task(task_id, co):
         return
     print(res)
     task = json.loads(res[0][0])
-    result, message = do_with_task(task, co, db_worker, task_id)
+    sc = pyspark.SparkContext(conf=co)
+    result, message = do_with_task(task, sc, db_worker, task_id)
+    sc.stop()
     now = time.localtime(time.time())
     print(task_id, message)
     db_worker.update_status(task_id, message, now)
     return 0
 
 
-def do_with_task(args, co, db_worker, task_id):
-    sc = pyspark.SparkContext(conf=co)
+def do_with_task(args, sc, db_worker, task_id):
     res, dic, lines = task_split(args)
     data = dict()
     for each in res['in0']:
