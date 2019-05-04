@@ -148,8 +148,7 @@ def run_func(node_type, params=None, sc=None, in1=None, in2=None):
     return eval(s + '(sc=sc, in1=in1, in2=in2, **params)')
 
 
-if __name__ == '__main__':
-    os.environ['PYSPARK_PYTHON'] = sys.executable
+def run():
     _sc = pyspark.SparkConf()
     _sc.setMaster(SPARK_MASTER)
     print('start')
@@ -158,3 +157,9 @@ if __name__ == '__main__':
         model_id = rd.blpop('task')
         # print(model_id)
         do_task(model_id[1].decode(), _sc)
+
+
+if __name__ == '__main__':
+    run()
+    python = sys.executable
+    os.execl(python, python, *sys.argv)
