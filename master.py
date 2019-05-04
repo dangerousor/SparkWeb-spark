@@ -20,7 +20,8 @@ def do_task(task_id, co):
     if not res:
         print(task_id + 'not exist in database')
         return
-    task = json.loads(res[0])
+    print(res)
+    task = json.loads(res[0][0])
     result, message = do_with_task(task, co, db_worker, task_id)
     now = time.localtime(time.time())
     print(task_id, message)
