@@ -9,61 +9,61 @@ from pyspark.mllib.regression import LabeledPoint
 
 
 @err_wrap
-def data_outstream(in1, **params):
+def data_outstream(sc, in1, **params):
     in1.saveAsTextFile(HDFS_PATH + params['user'] + '/data/' + params['path'])
     return True, None
 
 
 @err_wrap
-def model_outstream(in1, sc, **params):
+def model_outstream(sc, in1, **params):
     in1.save(sc, HDFS_PATH + params['user'] + '/model/' + params['path'])
     return True, None
 
 
 @err_wrap
-def cache(in1, **params):
+def cache(sc, in1, **params):
     in1.cache()
     return True, in1
 
 
 @err_wrap
-def distinct_col(in1, **params):
+def distinct_col(sc, in1, **params):
     temp = in1.map(lambda row: row[int(params['columns'])]).distinct()
     return True, temp
 
 
 @err_wrap
-def distinct_row(in1, **params):
+def distinct_row(sc, in1, **params):
     temp = in1.map(lambda row: set(list(row)))
     return True, temp
 
 
 @err_wrap
-def map(in1, **params):
+def map(sc, in1, **params):
     temp = in1.map(eval(params['lambda']))
     return True, temp
 
 
 @err_wrap
-def filter(in1, **params):
+def filter(sc, in1, **params):
     temp = in1.filter(eval(params['filter']))
     return True, temp
 
 
 @err_wrap
-def sample(in1, **params):
+def sample(sc, in1, **params):
     temp = in1.sample(False, params['fraction'], 666)
     return True, temp
 
 
 @err_wrap
-def split_col(in1, **params):
+def split_col(sc, in1, **params):
     temp = in1.map(lambda x: list(x)[int(params['start']): int(params['end'])])
     return True, temp
 
 
 @err_wrap
-def sort(in1, **params):
+def sort(sc, in1, **params):
     if params['columns'].isdigit():
         temp = in1.sortBy(lambda x: x[int(params['columns'])], ascending=eval(params['ascending']))
         return True, temp
@@ -72,7 +72,7 @@ def sort(in1, **params):
 
 
 @err_wrap
-def normalization(in1, **params):
+def normalization(sc, in1, **params):
     if params['method'] == 'no':
         temp = in1.map(lambda x: x)
     elif params['method'] == 'int':
@@ -99,19 +99,19 @@ def normalization(in1, **params):
 
 
 @err_wrap
-def kmeans(in1, **params):
+def kmeans(sc, in1, **params):
     temp = KMeans.train(in1, k=int(params['k']), maxIterations=int(params['maxIterations']))
     return True, temp
 
 
 @err_wrap
-def fpgrowth(in1, **params):
+def fpgrowth(sc, in1, **params):
     temp = FPGrowth.train(in1, float(params['minSupport']))
     return True, temp
 
 
 @err_wrap
-def logistic_regression(in1, **params):
+def logistic_regression(sc, in1, **params):
     temp = in1.map(lambda x: LabeledPoint(x[int(params['label'])], x[:int(params['label']) + x[int(params['label'])+1:]]))
     temp = LogisticRegressionWithLBFGS.train(temp, iterations=int(params['iterations']), numClasses=int(params['numClasses']))
     return True, temp

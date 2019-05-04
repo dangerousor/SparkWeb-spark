@@ -5,7 +5,7 @@ import pyspark
 
 
 @err_wrap
-def predict(in1, in2, **params):
+def predict(sc, in1, in2, **params):
     if isinstance(in1, pyspark.RDD):
         temp = in2.predict(in1)
     else:

@@ -20,7 +20,7 @@ def data_instream(sc, **params):
 
 
 @err_wrap
-def model_instream(**params):
+def model_instream(sc, **params):
     if params['type'] == 'kmeans':
         model = KMeansModel.load(HDFS_PATH + params['user'] + '/model/' + params['path'])
     elif params['type'] == 'fpgrowth':
