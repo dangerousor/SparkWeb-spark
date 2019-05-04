@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 import redis
-from sqlalchemy import CHAR, Column, DateTime, Float, JSON, String, Text, text, create_engine
+from sqlalchemy import Column, DateTime, String, Text, create_engine
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -18,7 +18,7 @@ class DBTask(Base):
     subtime = Column(DateTime, nullable=False)
     endtime = Column(DateTime)
     status = Column(Text, nullable=False)
-    task = Column(JSON, nullable=False)
+    task = Column(Text, nullable=False)
     user = Column(String(16), nullable=False)
 
 
