@@ -3,13 +3,13 @@
 import json
 import time
 
-from basic.ext import DBWorker, DBTask, DBData, rd
-from basic.inout import *
-from basic.const import SPARK_MASTER
+from ext import DBWorker, DBTask, DBData, rd
+from inout import *
+from const import SPARK_MASTER
 
-from basic.in0 import *
-from basic.in1 import *
-from basic.in2 import *
+from in0 import *
+from in1 import *
+from in2 import *
 
 # LogisticRegression xgboost random-forest
 # Kmeans dbscan
