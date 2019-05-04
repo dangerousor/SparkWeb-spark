@@ -35,7 +35,7 @@ rd = redis.Redis(host='localhost', port=6379, db=0)
 
 
 class DBWorker:
-    db_uri = 'mysql+pymysql://root:liuxiaofeng@localhost:3306/SparkWebProject?charset=utf8'
+    db_uri = 'mysql+pymysql://root:liuxiaofeng@localhost:3306/sparkwebproject?charset=utf8'
     engine = create_engine(db_uri)
     DBsession = sessionmaker(bind=engine)
 
