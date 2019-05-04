@@ -16,6 +16,8 @@ from basic.in2 import *
 # apriori fpgrowth prefixspan
 
 import pyspark
+import os
+import sys
 
 
 def do_task(task_id, co):
@@ -147,6 +149,7 @@ def run_func(node_type, params=None, sc=None, in1=None, in2=None):
 
 
 if __name__ == '__main__':
+    os.environ['PYSPARK_PYTHON'] = sys.executable
     _sc = pyspark.SparkConf()
     _sc.setMaster(SPARK_MASTER)
     print('start')
