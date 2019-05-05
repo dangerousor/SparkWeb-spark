@@ -71,23 +71,21 @@ def do(t, dic, lines_in, lines_out, sc, task_id, db_worker):
                 step=t,
                 data=str(tmp),
             ))
+        for each in lines_out[t + 'out1']:
+            do(each[:-3], dic, lines_in, lines_out, sc, task_id, db_worker)
     elif dic[t]['node_type'] in in1out0:
-        if len(lines_in[t]) != 1:
-            return False, t + 'linked by ' + str(len(lines_in[t])) + 'line, need 1'
-        if lines_in[t][0] not in data:
-            return False, 'run ' + t + ' but ' + lines_in[t][0] + ' not in data'
+        if lines_in[t + 'in1'] not in data:
+            return False, 'run ' + t + ' but ' + lines_in[t + 'in1'] + ' not in data'
             # continue
-        result, tmp = run_func(dic[t]['node_type'], sc=sc, params=dic[t]['params'], in1=data[lines_in[t][0]])
+        result, tmp = run_func(dic[t]['node_type'], sc=sc, params=dic[t]['params'], in1=data[lines_in[t + 'in1']])
         if not result:
             sc.cancelAllJobs()
             return False, tmp
     elif dic[t]['node_type'] in in1out1:
-        if len(lines_in[t]) != 1:
-            return False, t + 'linked by ' + str(len(lines_in[t])) + 'line, need 1'
-        if lines_in[t][0] not in data:
-            return False, 'run ' + t + ' but ' + lines_in[t][0] + ' not in data'
+        if lines_in[t + 'in1'] not in data:
+            return False, 'run ' + t + ' but ' + lines_in[t + 'in1'] + ' not in data'
             # continue
-        result, tmp = run_func(dic[t]['node_type'], sc=sc, params=dic[t]['params'], in1=data[lines_in[t][0]])
+        result, tmp = run_func(dic[t]['node_type'], sc=sc, params=dic[t]['params'], in1=data[lines_in[t + 'in1']])
         if not result:
             sc.cancelAllJobs()
             return False, tmp
@@ -105,13 +103,13 @@ def do(t, dic, lines_in, lines_out, sc, task_id, db_worker):
                 step=t,
                 data=str(tmp),
             ))
+        for each in lines_out[t + 'out1']:
+            do(each[:-3], dic, lines_in, lines_out, sc, task_id, db_worker)
     elif dic[t]['node_type'] in in1out2:
-        if len(lines_in[t]) != 1:
-            return False, t + 'linked by ' + str(len(lines_in[t])) + 'line, need 1'
-        if lines_in[t][0] not in data:
-            return False, 'run ' + t + ' but ' + lines_in[t][0] + ' not in data'
+        if lines_in[t + 'in1'] not in data:
+            return False, 'run ' + t + ' but ' + lines_in[t + 'in1'] + ' not in data'
             # continue
-        result, tmp = run_func(dic[t]['node_type'], sc=sc, params=dic[t]['params'], in1=data[lines_in[t][0]])
+        result, tmp = run_func(dic[t]['node_type'], sc=sc, params=dic[t]['params'], in1=data[lines_in[t + 'in1'][0]])
         if not result:
             sc.cancelAllJobs()
             return False, tmp
@@ -143,15 +141,17 @@ def do(t, dic, lines_in, lines_out, sc, task_id, db_worker):
                 step=t,
                 data=str(tmp[1]),
             ))
+        for each in lines_out[t + 'out1']:
+            do(each[:-3], dic, lines_in, lines_out, sc, task_id, db_worker)
+        for each in lines_out[t + 'out2']:
+            do(each[:-3], dic, lines_in, lines_out, sc, task_id, db_worker)
     elif dic[t]['node_type'] in in2out1:
-        if len(lines_in[t]) != 2:
-            return False, t + 'linked by ' + str(len(lines_in[t])) + 'lines, need 2'
-        if lines_in[t][0] not in data and lines_in[t][1] not in data:
+        if lines_in[t + 'in1'] not in data and lines_in[t + 'in2'] not in data:
             return False, 'run ' + t + ' but ' + lines_in[t][0] + ' or ' + lines_in[t][1] + ' not in data'
             # continue
-        if lines_in[t][0] not in data or lines_in[t][1] not in data:
+        if lines_in[t + 'in1'] not in data or lines_in[t + 'in2'] not in data:
             return True, None
-        result, tmp = run_func(dic[t]['node_type'], sc=sc, params=dic[t]['params'], in1=data[lines_in[t][0]], in2=data[lines_in[t][1]])
+        result, tmp = run_func(dic[t]['node_type'], sc=sc, params=dic[t]['params'], in1=data[lines_in[t + 'in1']], in2=data[lines_in[t + 'in2']])
         if not result:
             sc.cancelAllJobs()
             return False, tmp
@@ -170,14 +170,12 @@ def do(t, dic, lines_in, lines_out, sc, task_id, db_worker):
                 data=str(tmp),
             ))
     elif dic[t]['node_type'] in in2out2:
-        if len(lines_in[t]) != 2:
-            return False, t + 'linked by ' + str(len(lines_in[t])) + 'lines, need 2'
-        if lines_in[t][0] not in data and lines_in[t][1] not in data:
-            return False, 'run ' + t + ' but ' + lines_in[t][0] + ' or ' + lines_in[t][1] + ' not in data'
+        if lines_in[t + 'in1'] not in data and lines_in[t + 'in2'] not in data:
+            return False, 'run ' + t + ' but ' + lines_in[t + 'in1'] + ' or ' + lines_in[t + 'in2'] + ' not in data'
             # continue
-        if lines_in[t][0] not in data or lines_in[t][1] not in data:
+        if lines_in[t + 'in1'] not in data or lines_in[t + 'in2'] not in data:
             return True, None
-        result, tmp = run_func(dic[t]['node_type'], sc=sc, params=dic[t]['params'], in1=data[lines_in[t][0]], in2=data[lines_in[t][1]])
+        result, tmp = run_func(dic[t]['node_type'], sc=sc, params=dic[t]['params'], in1=data[lines_in[t + 'in1']], in2=data[lines_in[t + 'in2']])
         if not result:
             sc.cancelAllJobs()
             return False, tmp
@@ -211,8 +209,6 @@ def do(t, dic, lines_in, lines_out, sc, task_id, db_worker):
             ))
     else:
         return False, 'Invalid inout type!' + t
-    for each in lines_out[t]:
-        do(each, dic, lines_in, lines_out, sc, task_id, db_worker)
     return True, None
 
 
@@ -226,10 +222,7 @@ def task_split(args):
     lines_in = dict()
     lines_out = dict()
     for line, pair in args['all_lines'].items():
-        if pair[1] not in lines_in:
-            lines_in[pair[1]] = [pair[0], ]
-        else:
-            lines_in[pair[1]].append(pair[0])
+        lines_in[pair[1]] = pair[0]
         if pair[0] not in lines_out:
             lines_out[pair[0]] = [pair[1], ]
         else:
