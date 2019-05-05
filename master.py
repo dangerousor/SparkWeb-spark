@@ -20,6 +20,9 @@ import os
 import sys
 
 
+data = dict()
+
+
 def do_task(task_id, co):
     db_worker = DBWorker()
     res = db_worker.query(DBTask.task, DBTask.id == task_id)
@@ -38,90 +41,77 @@ def do_task(task_id, co):
 
 
 def do_with_task(args, sc, db_worker, task_id):
-    res, dic, lines = task_split(args)
-    data = dict()
+    res, dic, lines_in, lines_out = task_split(args)
     for each in res['in0']:
-        result, tmp = run_func(dic[each]['node_type'], sc=sc, params=dic[each]['params'])
+        result, tmp = do(each, res, dic, lines_in, lines_out, sc, task_id, db_worker)
         if not result:
-            sc.cancelAllJobs()
             return False, tmp
-        data[each] = tmp
-        if isinstance(tmp, pyspark.RDD):
-            temp = tmp.first()
-            db_worker.insert(DBData(
-                task_id=task_id,
-                step=each,
-                data=repr(temp),
-            ))
-        elif isinstance(tmp, int) or isinstance(tmp, str):
-            db_worker.insert(DBData(
-                task_id=task_id,
-                step=each,
-                data=str(tmp),
-            ))
-    for each in res['in1']:
-        if len(lines[each]) != 1:
-            return False, each + 'linked by ' + str(len(lines[each])) + 'line, need 1'
-        if lines[each][0] not in data:
-            return False, 'run ' + each + ' but ' + lines[each][0] + ' not in data'
-        result, tmp = run_func(dic[each]['node_type'], sc=sc, params=dic[each]['params'], in1=data[lines[each][0]])
-        if not result:
-            sc.cancelAllJobs()
-            return False, tmp
-        data[each] = tmp
-        if isinstance(tmp, pyspark.RDD):
-            temp = tmp.first()
-            db_worker.insert(DBData(
-                task_id=task_id,
-                step=each,
-                data=repr(temp),
-            ))
-        elif isinstance(tmp, int) or isinstance(tmp, str):
-            db_worker.insert(DBData(
-                task_id=task_id,
-                step=each,
-                data=str(tmp),
-            ))
-    for each in res['in2']:
-        if len(lines[each]) != 2:
-            return False, each + 'linked by ' + str(len(lines[each])) + 'lines, need 2'
-        if lines[each][0] not in data or lines[each][1] not in data:
-            return False, 'run ' + each + ' but ' + lines[each][0] + ' or ' + lines[each][1] + ' not in data'
-        result, tmp = run_func(dic[each]['node_type'], sc=sc, params=dic[each]['params'], in1=data[lines[each][0]], in2=data[lines[each][1]])
-        if not result:
-            sc.cancelAllJobs()
-            return False, tmp
-        data[each] = tmp
-        if isinstance(tmp, pyspark.RDD):
-            temp = tmp.first()
-            db_worker.insert(DBData(
-                task_id=task_id,
-                step=each,
-                data=repr(temp),
-            ))
-        elif isinstance(tmp, int) or isinstance(tmp, str):
-            db_worker.insert(DBData(
-                task_id=task_id,
-                step=each,
-                data=str(tmp),
-            ))
-
     return True, 'success'
+
+
+def do(t, res, dic, lines_in, lines_out, sc, task_id, db_worker):
+    db_worker.update_status(task_id, 'running step:' + t)
+    global data
+    if t in res['in0']:
+        result, tmp = run_func(dic[t]['node_type'], sc=sc, params=dic[t]['params'])
+    elif t in res['in1']:
+        if len(lines_in[t]) != 1:
+            return False, t + 'linked by ' + str(len(lines_in[t])) + 'line, need 1'
+        if lines_in[t][0] not in data:
+            return False, 'run ' + t + ' but ' + lines_in[t][0] + ' not in data'
+            # continue
+        result, tmp = run_func(dic[t]['node_type'], sc=sc, params=dic[t]['params'], in1=data[lines_in[t][0]])
+    elif t in res['in2']:
+        if len(lines_in[t]) != 2:
+            return False, t + 'linked by ' + str(len(lines_in[t])) + 'lines, need 2'
+        if lines_in[t][0] not in data and lines_in[t][1] not in data:
+            return False, 'run ' + t + ' but ' + lines_in[t][0] + ' or ' + lines_in[t][1] + ' not in data'
+            # continue
+        if lines_in[t][0] not in data or lines_in[t][1] not in data:
+            return True, None
+        result, tmp = run_func(dic[t]['node_type'], sc=sc, params=dic[t]['params'], in1=data[lines_in[t][0]], in2=data[lines_in[t][1]])
+    else:
+        return False, 'Invalid inout type!' + t
+    if not result:
+        sc.cancelAllJobs()
+        return False, tmp
+    data[t] = tmp
+    if isinstance(tmp, pyspark.RDD):
+        temp = tmp.first()
+        db_worker.insert(DBData(
+            task_id=task_id,
+            step=t,
+            data=repr(temp),
+        ))
+    elif isinstance(tmp, int) or isinstance(tmp, str):
+        db_worker.insert(DBData(
+            task_id=task_id,
+            step=t,
+            data=str(tmp),
+        ))
+    for each in lines_out[t]:
+        do(each, res, dic, lines_in, lines_out, sc, task_id, db_worker)
+    return True, None
 
 
 def task_split(args):
     res = {
-        'in0': list(),
-        'in1': list(),
-        'in2': list(),
+        'in0': set(),
+        'in1': set(),
+        'in2': set(),
     }
     dic = dict()
-    lines = dict()
+    lines_in = dict()
+    lines_out = dict()
     for line, pair in args['all_lines'].items():
-        if pair[1] not in lines:
-            lines[pair[1]] = [pair[0], ]
+        if pair[1] not in lines_in:
+            lines_in[pair[1]] = [pair[0], ]
         else:
-            lines[pair[1]].append(pair[0])
+            lines_in[pair[1]].append(pair[0])
+        if pair[0] not in lines_out:
+            lines_out[pair[0]] = [pair[1], ]
+        else:
+            lines_out[pair[0]].append(pair[1])
     for node, t in args['all_nodes'].items():
         dic[node] = {
                 'name': node,
@@ -129,18 +119,18 @@ def task_split(args):
                 'params': args['nodes_details'][node],
         }
         if t in in0out1:
-            res['in0'].append(node)
+            res['in0'].add(node)
 
         elif t in in1out0 or t in in1out1 or t in in1out2:
-            res['in1'].append(node)
+            res['in1'].add(node)
 
         elif t in in2out1 or t in in2out2:
-            res['in2'].append(node)
+            res['in2'].add(node)
 
         else:
             print("ERROR, unknown type found : " + t)
             return False
-    return res, dic, lines
+    return res, dic, lines_in, lines_out
 
 
 def run_func(node_type, params=None, sc=None, in1=None, in2=None):
@@ -149,10 +139,12 @@ def run_func(node_type, params=None, sc=None, in1=None, in2=None):
 
 
 def run():
+    global data
     _sc = pyspark.SparkConf()
     _sc.setMaster(SPARK_MASTER)
     print('start')
     while True:
+        data = dict()
         print('waiting')
         model_id = rd.blpop('task')
         # print(model_id)

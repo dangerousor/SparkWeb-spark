@@ -70,7 +70,6 @@ class DBWorker:
         session = self.get_session()
         result = session.query(DBTask).filter(DBTask.id == task_id).first()
         result.status = status
-        if t:
-            result.endtime = t
+        result.endtime = t
         session.commit()
         return True
