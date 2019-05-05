@@ -22,11 +22,11 @@ def data_instream(sc, **params):
 @err_wrap
 def model_instream(sc, **params):
     if params['type'] == 'kmeans':
-        model = KMeansModel.load(HDFS_PATH + params['user'] + '/model/' + params['path'])
+        model = KMeansModel.load(sc, HDFS_PATH + params['user'] + '/model/' + params['path'])
     elif params['type'] == 'fpgrowth':
-        model = FPGrowthModel.load(HDFS_PATH + params['user'] + '/model/' + params['path'])
+        model = FPGrowthModel.load(sc, HDFS_PATH + params['user'] + '/model/' + params['path'])
     elif params['type'] == 'logistic-regression':
-        model = LogisticRegressionModel.load(HDFS_PATH + params['user'] + '/model/' + params['path'])
+        model = LogisticRegressionModel.load(sc, HDFS_PATH + params['user'] + '/model/' + params['path'])
     else:
         raise Exception("Invalid model path!")
     return True, model
