@@ -15,16 +15,20 @@ in1out1 = [
     "fpgrowth",
     "logistic-regression",
     "sort",
-    "random",
+    # "random",
     "normalization",
     "split-col",
+    "cache",
+    "distinct-col",
+    "distinct-row",
+    "map",
+    "filter",
+    "sample",
 ]
 in1out2 = [
 ]
 in2out1 = [
     "predict",
-    "merge-row",
-    "merge-col",
 ]
 in2out2 = [
 

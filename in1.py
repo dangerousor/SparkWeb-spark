@@ -34,7 +34,7 @@ def distinct_col(sc, in1, **params):
 
 @err_wrap
 def distinct_row(sc, in1, **params):
-    temp = in1.map(lambda row: set(list(row)))
+    temp = in1.map(lambda row: list(set(list(row))))
     return True, temp
 
 
