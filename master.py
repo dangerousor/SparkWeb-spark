@@ -43,7 +43,7 @@ def do_task(task_id, co):
 def do_with_task(args, sc, db_worker, task_id):
     res, dic, lines_in, lines_out = task_split(args)
     for each in res['in0']:
-        result, tmp = do(each, res, dic, lines_in, lines_out, sc, task_id, db_worker)
+        result, tmp = do(each, dic, lines_in, lines_out, sc, task_id, db_worker)
         if not result:
             return False, tmp
     return True, 'success'
