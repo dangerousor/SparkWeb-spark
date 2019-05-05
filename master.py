@@ -23,8 +23,7 @@ import sys
 data = dict()
 
 
-def do_task(task_id, co):
-    db_worker = DBWorker()
+def do_task(task_id, co, db_worker):
     res = db_worker.query(DBTask.task, DBTask.id == task_id)
     if not res:
         print(task_id + 'not exist in database')
@@ -257,13 +256,19 @@ def run():
     global data
     _sc = pyspark.SparkConf()
     _sc.setMaster(SPARK_MASTER)
+    db_worker = DBWorker()
     print('start')
     while True:
         data = dict()
         print('waiting')
-        model_id = rd.blpop('task')
+        task_id = rd.blpop('task')
         # print(model_id)
-        do_task(model_id[1].decode(), _sc)
+        db_worker.update_status(task_id[1].decode(), 'running')
+        try:
+            do_task(task_id[1].decode(), _sc, db_worker)
+        except Exception as E:
+            print(E)
+            db_worker.update_status(task_id[1].decode(), 'fail')
 
 
 if __name__ == '__main__':
