@@ -71,7 +71,9 @@ def do(t, dic, lines_in, lines_out, sc, task_id, db_worker):
                 data=str(tmp),
             ))
         for each in lines_out[t + 'out1']:
-            do(each[:-3], dic, lines_in, lines_out, sc, task_id, db_worker)
+            result, tmp = do(each[:-3], dic, lines_in, lines_out, sc, task_id, db_worker)
+            if not result:
+                return result, tmp
     elif dic[t]['node_type'] in in1out0:
         if lines_in[t + 'in1'] not in data:
             return False, 'run ' + t + ' but ' + lines_in[t + 'in1'] + ' not in data'
@@ -103,7 +105,9 @@ def do(t, dic, lines_in, lines_out, sc, task_id, db_worker):
                 data=str(tmp),
             ))
         for each in lines_out[t + 'out1']:
-            do(each[:-3], dic, lines_in, lines_out, sc, task_id, db_worker)
+            result, tmp = do(each[:-3], dic, lines_in, lines_out, sc, task_id, db_worker)
+            if not result:
+                return result, tmp
     elif dic[t]['node_type'] in in1out2:
         if lines_in[t + 'in1'] not in data:
             return False, 'run ' + t + ' but ' + lines_in[t + 'in1'] + ' not in data'
@@ -141,9 +145,13 @@ def do(t, dic, lines_in, lines_out, sc, task_id, db_worker):
                 data=str(tmp[1]),
             ))
         for each in lines_out[t + 'out1']:
-            do(each[:-3], dic, lines_in, lines_out, sc, task_id, db_worker)
+            result, tmp = do(each[:-3], dic, lines_in, lines_out, sc, task_id, db_worker)
+            if not result:
+                return result, tmp
         for each in lines_out[t + 'out2']:
-            do(each[:-3], dic, lines_in, lines_out, sc, task_id, db_worker)
+            result, tmp = do(each[:-3], dic, lines_in, lines_out, sc, task_id, db_worker)
+            if not result:
+                return result, tmp
     elif dic[t]['node_type'] in in2out1:
         if lines_in[t + 'in1'] not in data and lines_in[t + 'in2'] not in data:
             return False, 'run ' + t + ' but ' + lines_in[t][0] + ' or ' + lines_in[t][1] + ' not in data'
@@ -168,6 +176,10 @@ def do(t, dic, lines_in, lines_out, sc, task_id, db_worker):
                 step=t,
                 data=str(tmp),
             ))
+        for each in lines_out[t + 'out1']:
+            result, tmp = do(each[:-3], dic, lines_in, lines_out, sc, task_id, db_worker)
+            if not result:
+                return result, tmp
     elif dic[t]['node_type'] in in2out2:
         if lines_in[t + 'in1'] not in data and lines_in[t + 'in2'] not in data:
             return False, 'run ' + t + ' but ' + lines_in[t + 'in1'] + ' or ' + lines_in[t + 'in2'] + ' not in data'
@@ -206,6 +218,14 @@ def do(t, dic, lines_in, lines_out, sc, task_id, db_worker):
                 step=t,
                 data=str(tmp[1]),
             ))
+        for each in lines_out[t + 'out1']:
+            result, tmp = do(each[:-3], dic, lines_in, lines_out, sc, task_id, db_worker)
+            if not result:
+                return result, tmp
+        for each in lines_out[t + 'out2']:
+            result, tmp = do(each[:-3], dic, lines_in, lines_out, sc, task_id, db_worker)
+            if not result:
+                return result, tmp
     else:
         return False, 'Invalid inout type!' + t
     return True, None
