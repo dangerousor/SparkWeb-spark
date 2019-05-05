@@ -106,7 +106,7 @@ def kmeans(sc, in1, **params):
 
 @err_wrap
 def fpgrowth(sc, in1, **params):
-    temp = FPGrowth.train(in1, float(params['minSupport']))
+    temp = FPGrowth.train(in1, float(params['minSupport']), in1.getNumPartitions())
     return True, temp
 
 
