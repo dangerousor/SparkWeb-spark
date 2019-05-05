@@ -112,6 +112,6 @@ def fpgrowth(sc, in1, **params):
 
 @err_wrap
 def logistic_regression(sc, in1, **params):
-    temp = in1.map(lambda x: LabeledPoint(x[int(params['label'])], x[:int(params['label']) + x[int(params['label'])+1:]]))
+    temp = in1.map(lambda x: LabeledPoint(x[int(params['label'])], x[:int(params['label'])] + x[int(params['label'])+1:]))
     temp = LogisticRegressionWithLBFGS.train(temp, iterations=int(params['iterations']), numClasses=int(params['numClasses']))
     return True, temp
