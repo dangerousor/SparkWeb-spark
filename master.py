@@ -3,7 +3,7 @@
 import json
 import time
 
-from ext import DBWorker, DBTask, DBData, rd
+from ext import DBWorker, DBTask, DBData, rd, cache
 from inout import *
 from const import SPARK_MASTER
 
@@ -24,19 +24,27 @@ data = dict()
 
 
 def do_task(task_id, co, db_worker):
-    res = db_worker.query(DBTask.task, DBTask.id == task_id)
+    res = db_worker.query(DBTask.id == task_id)
     if not res:
-        print(task_id + 'not exist in database')
-        return
-    print(res)
-    task = json.loads(res[0][0])
+        print(task_id, 'not exist in database')
+        return False
+    if res.first().is_deleted:
+        print(task_id, ' is deleted.')
+        return True
+    task = json.loads(res.first().task)
+    cache.user = res.first().user
     sc = pyspark.SparkContext(conf=co)
+    cache.fs = sc._jvm.org.apache.hadoop.fs.FileSystem.get(sc._jsc.hadoopConfiguration())
     result, message = do_with_task(task, sc, db_worker, task_id)
     sc.stop()
     now = time.localtime(time.time())
     print(task_id, message)
-    db_worker.update_status(task_id, message, now)
-    return 0
+    db_worker.update_log(task_id, message)
+    if not result:
+        db_worker.update_status(task_id, 'Fail', now)
+    else:
+        db_worker.update_status(task_id, 'Success', now)
+    return True
 
 
 def do_with_task(args, sc, db_worker, task_id):
@@ -45,7 +53,7 @@ def do_with_task(args, sc, db_worker, task_id):
         result, tmp = do(each, dic, lines_in, lines_out, sc, task_id, db_worker)
         if not result:
             return False, tmp
-    return True, 'success'
+    return True, 'Success'
 
 
 def do(t, dic, lines_in, lines_out, sc, task_id, db_worker):
@@ -288,7 +296,8 @@ def run():
             do_task(task_id[1].decode(), _sc, db_worker)
         except Exception as E:
             print(E)
-            db_worker.update_status(task_id[1].decode(), 'fail')
+            now = time.localtime(time.time())
+            db_worker.update_status(task_id[1].decode(), 'Fail', now)
 
 
 if __name__ == '__main__':

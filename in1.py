@@ -2,20 +2,27 @@
 # -*- coding:utf-8 -*-
 from error import err_wrap
 from const import HDFS_PATH
+from ext import cache
 from pyspark.mllib.clustering import KMeans
 from pyspark.mllib.fpm import FPGrowth
-from pyspark.mllib.classification import LogisticRegressionWithLBFGS
+from pyspark.mllib.classification import LogisticRegressionWithLBFGS, NaiveBayes, SVMWithSGD
 from pyspark.mllib.regression import LabeledPoint
+from pyspark.mllib.feature import Word2Vec
+from pyspark.mllib.tree import DecisionTree
 
 
 @err_wrap
 def data_outstream(sc, in1, **params):
+    if cache.fs.exists(sc._jvm.org.apache.hadoop.fs.Path(HDFS_PATH + str(cache.user) + '/data/' + params['path'])):
+        raise Exception("Invalid file path, path already exists!")
     in1.saveAsTextFile(HDFS_PATH + params['user'] + '/data/' + params['path'])
     return True, None
 
 
 @err_wrap
 def model_outstream(sc, in1, **params):
+    if cache.fs.exists(sc._jvm.org.apache.hadoop.fs.Path(HDFS_PATH + str(cache.user) + '/model/' + params['path'])):
+        raise Exception("Invalid model path, path already exists!")
     in1.save(sc, HDFS_PATH + params['user'] + '/model/' + params['path'])
     return True, None
 
@@ -112,6 +119,35 @@ def fpgrowth(sc, in1, **params):
 
 @err_wrap
 def logistic_regression(sc, in1, **params):
-    temp = in1.map(lambda x: LabeledPoint(x[int(params['label'])], x[:int(params['label'])] + x[int(params['label'])+1:]))
+    temp = in1.map(lambda x: LabeledPoint(x[int(params['label'])], x[:int(params['label'])] + x[int(params['label']) + 1:]))
     temp = LogisticRegressionWithLBFGS.train(temp, iterations=int(params['iterations']), numClasses=int(params['numClasses']))
     return True, temp
+
+
+@err_wrap
+def word2vec(sc, in1, **params):
+    temp = Word2Vec().setVectorSize(params['vectorSize']).fit(in1)
+    return True, temp
+
+
+@err_wrap
+def decision_tree(sc, in1, **params):
+    temp = in1.map(lambda x: LabeledPoint(x[int(params['label'])], x[:int(params['label'])] + x[int(params['label']) + 1:]))
+    temp = DecisionTree.trainClassifier(temp, params['numClasses'], {})
+    return True, temp
+
+
+@err_wrap
+def naive_bayes(sc, in1, **params):
+    temp = in1.map(lambda x: LabeledPoint(x[int(params['label'])], x[:int(params['label'])] + x[int(params['label']) + 1:]))
+    temp = NaiveBayes.train(temp, float(params['lambda']))
+    return True, temp
+
+
+@err_wrap
+def svm(sc, in1, **params):
+    temp = in1.map(lambda x: LabeledPoint(x[int(params['label'])], x[:int(params['label'])] + x[int(params['label'])+1:]))
+    temp = SVMWithSGD.train(temp, int(params['iterations']))
+    return True, temp
+
+# word2vec Collaborative_filtering

@@ -1,11 +1,12 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 import redis
-from sqlalchemy import Column, DateTime, String, Text, create_engine
+from sqlalchemy import Column, DateTime, String, Text, create_engine, Boolean
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import exists
+from const import REDIS_DB, REDIS_HOST, REDIS_PORT, DB_URI
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -19,7 +20,11 @@ class DBTask(Base):
     endtime = Column(DateTime)
     status = Column(Text, nullable=False)
     task = Column(Text, nullable=False)
-    user = Column(String(16), nullable=False)
+    user = Column(INTEGER(11), nullable=False)
+    title = Column(Text)
+    note = Column(Text)
+    log = Column(Text)
+    is_deleted = Column(Boolean, default=False)
 
 
 class DBData(Base):
@@ -31,11 +36,20 @@ class DBData(Base):
     data = Column(Text)
 
 
-rd = redis.Redis(host='localhost', port=6379, db=0)
+class DBUser(Base):
+    __tablename__ = 'user'
+
+    index = Column(INTEGER(11), primary_key=True, autoincrement=True)
+    user_id = Column(String(16, nullable=False, unique=True))
+    password = Column(Text)
+    username = Column(Text)
+
+
+rd = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
 
 
 class DBWorker:
-    db_uri = 'mysql+pymysql://root:liuxiaofeng@localhost:3306/sparkwebproject?charset=utf8'
+    db_uri = DB_URI
     engine = create_engine(db_uri)
     DBsession = sessionmaker(bind=engine)
 
@@ -73,3 +87,18 @@ class DBWorker:
         result.endtime = t
         session.commit()
         return True
+
+    def update_log(self, task_id, log):
+        session = self.get_session()
+        result = session.query(DBTask).filter(DBTask.id == task_id).first()
+        result.log = log
+        session.commit()
+        return True
+
+
+class Cache:
+    user = int()
+    fs = None
+
+
+cache = Cache()
