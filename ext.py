@@ -40,7 +40,7 @@ class DBUser(Base):
     __tablename__ = 'user'
 
     index = Column(INTEGER(11), primary_key=True, autoincrement=True)
-    user_id = Column(String(16, nullable=False, unique=True))
+    user_id = Column(String(16), nullable=False, unique=True)
     password = Column(Text)
     username = Column(Text)
 
