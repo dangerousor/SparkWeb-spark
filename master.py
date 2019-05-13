@@ -28,11 +28,11 @@ def do_task(task_id, co, db_worker):
     if not res:
         print(task_id, 'not exist in database')
         return False
-    if res.first().is_deleted:
+    if res[0].is_deleted:
         print(task_id, ' is deleted.')
         return True
-    task = json.loads(res.first().task)
-    cache.user = res.first().user
+    task = json.loads(res[0].task)
+    cache.user = res[0].user
     sc = pyspark.SparkContext(conf=co)
     cache.fs = sc._jvm.org.apache.hadoop.fs.FileSystem.get(sc._jsc.hadoopConfiguration())
     result, message = do_with_task(task, sc, db_worker, task_id)
