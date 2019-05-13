@@ -13,7 +13,8 @@ from pyspark.mllib.tree import DecisionTree
 
 @err_wrap
 def data_outstream(sc, in1, **params):
-    if cache.fs.exists(sc._jvm.org.apache.hadoop.fs.Path(HDFS_PATH + str(cache.user) + '/data/' + params['path'])):
+    fs = sc._jvm.org.apache.hadoop.fs.FileSystem.get(sc._jsc.hadoopConfiguration())
+    if fs.exists(sc._jvm.org.apache.hadoop.fs.Path(HDFS_PATH + str(cache.user) + '/data/' + params['path'])):
         raise Exception("Invalid file path, path already exists!")
     in1.saveAsTextFile(HDFS_PATH + params['user'] + '/data/' + params['path'])
     return True, None
@@ -21,7 +22,8 @@ def data_outstream(sc, in1, **params):
 
 @err_wrap
 def model_outstream(sc, in1, **params):
-    if cache.fs.exists(sc._jvm.org.apache.hadoop.fs.Path(HDFS_PATH + str(cache.user) + '/model/' + params['path'])):
+    fs = sc._jvm.org.apache.hadoop.fs.FileSystem.get(sc._jsc.hadoopConfiguration())
+    if fs.exists(sc._jvm.org.apache.hadoop.fs.Path(HDFS_PATH + str(cache.user) + '/model/' + params['path'])):
         raise Exception("Invalid model path, path already exists!")
     in1.save(sc, HDFS_PATH + params['user'] + '/model/' + params['path'])
     return True, None

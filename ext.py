@@ -98,7 +98,6 @@ class DBWorker:
 
 class Cache:
     user = int()
-    fs = None
 
 
 cache = Cache()

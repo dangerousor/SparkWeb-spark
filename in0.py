@@ -12,7 +12,8 @@ from pyspark.mllib.tree import DecisionTreeModel
 
 @err_wrap
 def data_instream(sc, **params):
-    if not cache.fs.exists(sc._jvm.org.apache.hadoop.fs.Path(HDFS_PATH + str(cache.user) + '/data/' + params['path'])):
+    fs = sc._jvm.org.apache.hadoop.fs.FileSystem.get(sc._jsc.hadoopConfiguration())
+    if not fs.exists(sc._jvm.org.apache.hadoop.fs.Path(HDFS_PATH + str(cache.user) + '/data/' + params['path'])):
         raise Exception("Invalid file path, path not exists!")
     if params['type'] == 'file':
         text_file = sc.textFile(HDFS_PATH + str(cache.user) + '/data/' + params['path'])
@@ -26,7 +27,8 @@ def data_instream(sc, **params):
 
 @err_wrap
 def model_instream(sc, **params):
-    if not cache.fs.exists(sc._jvm.org.apache.hadoop.fs.Path(HDFS_PATH + str(cache.user) + '/model/' + params['path'])):
+    fs = sc._jvm.org.apache.hadoop.fs.FileSystem.get(sc._jsc.hadoopConfiguration())
+    if not fs.exists(sc._jvm.org.apache.hadoop.fs.Path(HDFS_PATH + str(cache.user) + '/model/' + params['path'])):
         raise Exception("Invalid file path, path not exists!")
     if params['type'] == 'kmeans':
         model = KMeansModel.load(sc, HDFS_PATH + str(cache.user) + '/model/' + params['path'])
