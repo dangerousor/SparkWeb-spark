@@ -24,7 +24,7 @@ data = dict()
 
 
 def do_task(task_id, co, db_worker):
-    res = db_worker.query(DBTask.id == task_id)
+    res = db_worker.query(DBTask, DBTask.id == task_id)
     if not res:
         print(task_id, 'not exist in database')
         return False
