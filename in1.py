@@ -55,7 +55,7 @@ def map(sc, in1, **params):
 
 @err_wrap
 def filter(sc, in1, **params):
-    temp = in1.filter(eval(params['filter']))
+    temp = in1.filter(eval(params['lambda']))
     return True, temp
 
 
