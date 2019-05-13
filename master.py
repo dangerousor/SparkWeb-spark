@@ -3,7 +3,7 @@
 import json
 import time
 
-from ext import DBWorker, DBTask, DBData, rd, cache
+from ext import DBWorker, DBTask, DBData, rd, g_cache
 from inout import *
 from const import SPARK_MASTER
 
@@ -32,7 +32,7 @@ def do_task(task_id, co, db_worker):
         print(task_id, ' is deleted.')
         return True
     task = json.loads(res[0].task)
-    cache.user = res[0].user
+    g_cache.user = res[0].user
     sc = pyspark.SparkContext(conf=co)
     result, message = do_with_task(task, sc, db_worker, task_id)
     sc.stop()

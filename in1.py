@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 from error import err_wrap
 from const import HDFS_PATH
-from ext import cache
+from ext import g_cache
 from pyspark.mllib.clustering import KMeans
 from pyspark.mllib.fpm import FPGrowth
 from pyspark.mllib.classification import LogisticRegressionWithLBFGS, NaiveBayes, SVMWithSGD
@@ -14,18 +14,18 @@ from pyspark.mllib.tree import DecisionTree
 @err_wrap
 def data_outstream(sc, in1, **params):
     fs = sc._jvm.org.apache.hadoop.fs.FileSystem.get(sc._jsc.hadoopConfiguration())
-    if fs.exists(sc._jvm.org.apache.hadoop.fs.Path(HDFS_PATH + str(cache.user) + '/data/' + params['path'])):
+    if fs.exists(sc._jvm.org.apache.hadoop.fs.Path(HDFS_PATH + str(g_cache.user) + '/data/' + params['path'])):
         raise Exception("Invalid file path, path already exists!")
-    in1.saveAsTextFile(HDFS_PATH + str(cache.user) + '/data/' + params['path'])
+    in1.saveAsTextFile(HDFS_PATH + str(g_cache.user) + '/data/' + params['path'])
     return True, None
 
 
 @err_wrap
 def model_outstream(sc, in1, **params):
     fs = sc._jvm.org.apache.hadoop.fs.FileSystem.get(sc._jsc.hadoopConfiguration())
-    if fs.exists(sc._jvm.org.apache.hadoop.fs.Path(HDFS_PATH + str(cache.user) + '/model/' + params['path'])):
+    if fs.exists(sc._jvm.org.apache.hadoop.fs.Path(HDFS_PATH + str(g_cache.user) + '/model/' + params['path'])):
         raise Exception("Invalid model path, path already exists!")
-    in1.save(sc, HDFS_PATH + str(cache.user) + '/model/' + params['path'])
+    in1.save(sc, HDFS_PATH + str(g_cache.user) + '/model/' + params['path'])
     return True, None
 
 

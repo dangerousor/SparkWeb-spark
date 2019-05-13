@@ -100,4 +100,4 @@ class Cache:
     user = int()
 
 
-cache = Cache()
+g_cache = Cache()
